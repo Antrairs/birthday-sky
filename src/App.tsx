@@ -244,18 +244,18 @@ function App() {
   return (
     <main className="space-backdrop min-h-[100svh]">
       <div className="mx-auto flex min-h-[100svh] w-[calc(100%_-_2rem)] max-w-[1220px] flex-col sm:w-[calc(100%_-_2.5rem)] lg:w-[calc(100%_-_4.5rem)]">
-        <header className="flex items-center justify-between pb-5 pt-[22px] sm:pt-[30px]">
-          <div className="inline-flex items-center gap-2.5 text-[0.77rem] font-semibold uppercase tracking-[0.17em] text-white/90" aria-label="Birthday Sky">
-            <span className="text-[1.1rem] leading-none text-[#aaa9ff]" aria-hidden="true">✦</span>
-            <span>Birthday Sky</span>
+        <header className="flex items-center justify-between border-b border-[rgba(220,224,230,0.12)] pb-5 pt-[22px] sm:pt-[30px]">
+          <div className="inline-flex items-center gap-2.5 text-[0.78rem] font-medium tracking-[0.08em] text-[#e8e8e4]" aria-label="计算机爱好者协会">
+            <span className="h-1.5 w-1.5 bg-[#aeb6c9]" aria-hidden="true" />
+            <span>计算机爱好者协会</span>
           </div>
-          <span className="hidden text-[0.63rem] uppercase tracking-[0.17em] text-[rgba(211,214,240,0.52)] sm:block">HUBBLE / DEEP SPACE</span>
+          <span className="hidden text-[0.68rem] tracking-[0.08em] text-[rgba(211,214,240,0.58)] sm:block">NASA / Hubble</span>
         </header>
 
         {results && activeRecord ? (
-          <section className="grid flex-1 grid-cols-1 content-start gap-7 py-5 sm:gap-10 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(310px,0.65fr)] lg:items-center lg:gap-[clamp(2rem,5vw,5.5rem)] lg:py-4 lg:pb-[3.2rem]" aria-live="polite">
+          <section className="grid flex-1 grid-cols-1 content-start gap-7 py-5 sm:gap-10 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(310px,0.65fr)] lg:items-start lg:gap-[clamp(2rem,5vw,5.5rem)] lg:py-4 lg:pb-[3.2rem]" aria-live="polite">
             <div className="min-w-0">
-              <div className="relative grid h-[45vh] min-h-[320px] place-items-center overflow-hidden border border-[rgba(184,188,255,0.27)] bg-[linear-gradient(135deg,rgba(23,26,62,0.9),rgba(4,6,17,0.92)),#080a19] shadow-[0_24px_70px_rgba(0,0,0,0.28)] before:absolute before:left-3.5 before:top-3.5 before:z-[1] before:h-[22px] before:w-[22px] before:border-l before:border-t before:border-[rgba(234,233,255,0.8)] before:content-[''] after:absolute after:bottom-3.5 after:right-3.5 after:z-[1] after:h-[22px] after:w-[22px] after:border-b after:border-r after:border-[rgba(234,233,255,0.8)] after:content-[''] sm:h-[min(60vh,680px)] sm:min-h-[360px] lg:aspect-[4/3] lg:h-[clamp(360px,60vh,680px)]">
+              <div className="relative mx-auto w-fit max-w-full overflow-hidden border border-[rgba(220,224,230,0.2)] bg-[#050607] shadow-[0_16px_40px_rgba(0,0,0,0.22)]">
                 {imageError ? (
                   <div className="grid max-w-[310px] gap-3 p-[30px] text-center text-[rgba(235,235,255,0.78)]">
                     <span className="text-[2.4rem] text-[#b4b6ff]">◌</span>
@@ -267,21 +267,24 @@ function App() {
                 ) : (
                   <img
                     key={activeRecord.imageFile}
-                    className="block h-full min-h-0 w-full animate-[image-in_680ms_ease_both] object-contain"
+                    className="block h-auto max-h-[min(72vh,720px)] max-w-full w-auto animate-[image-in_680ms_ease_both] object-contain"
                     src={`${NASA_IMAGE_BASE_URL}${encodeURIComponent(activeRecord.imageFile)}`}
                     alt={`${activeRecord.name}，哈勃空间望远镜影像`}
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
                     onError={() => setImageError(true)}
                   />
                 )}
                 <span className="absolute bottom-5 right-[22px] z-[2] text-[0.57rem] uppercase tracking-[0.17em] text-[rgba(236,236,255,0.66)]">NASA / ESA / Hubble</span>
               </div>
-              <div className="mt-3.5 flex flex-col items-start gap-2.5 text-[0.65rem] uppercase tracking-[0.17em] text-[rgba(189,192,227,0.64)] sm:flex-row sm:items-center sm:justify-between sm:gap-[18px]">
+              <div className="mt-3.5 flex flex-col items-start gap-2.5 text-[0.72rem] text-[rgba(189,192,227,0.7)] sm:flex-row sm:items-center sm:justify-between sm:gap-[18px]">
                 <span>同一天的 5 个视角</span>
                 <div className="flex gap-[7px]" role="group" aria-label="选择同一天的 Hubble 视角">
                   {results.map((record, index) => (
                     <button
                       key={record.imageFile}
-                      className={`h-[31px] w-[37px] border border-[rgba(174,178,255,0.28)] bg-[rgba(24,27,61,0.64)] text-[0.65rem] text-[rgba(226,227,255,0.72)] transition-[color,background,border-color] duration-200 hover:border-[#babdff] hover:bg-[#babdff] hover:text-[#111329] focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4 ${index === activeIndex ? 'border-[#babdff] bg-[#babdff] text-[#111329]' : ''}`}
+                      className={`h-[31px] w-[37px] border-0 border-b border-[rgba(174,178,255,0.28)] bg-transparent text-[0.72rem] text-[rgba(226,227,255,0.72)] transition-[color,border-color] duration-200 hover:border-[#c6cad8] hover:text-[#f1f1ed] focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4 ${index === activeIndex ? 'border-[#c6cad8] text-[#f1f1ed]' : ''}`}
                       type="button"
                       aria-label={`查看第 ${index + 1} 个视角`}
                       aria-pressed={index === activeIndex}
@@ -298,10 +301,9 @@ function App() {
             </div>
 
             <div className="max-w-[480px] lg:max-w-none">
-              <span className="block text-[0.65rem] font-semibold uppercase leading-[1.4] tracking-[0.17em] text-[#aaaaf2]">YOUR DAY / HUBBLE'S VIEW</span>
+              <span className="block text-[0.72rem] tracking-[0.08em] text-[#aeb6c9]">NASA · 哈勃生日观测</span>
               <p className="mt-[18px] text-base tracking-[0.12em] text-[#aeb1ff]">{dateLabel}</p>
-              <h1 className="my-3 max-w-[500px] text-[clamp(2.5rem,14vw,4.4rem)] font-semibold leading-[1.03] tracking-[-0.065em] text-[#f7f6ff] lg:text-[clamp(2.5rem,4.5vw,5rem)]">{activeRecord.name}</h1>
-              <div className="mb-[23px] h-px w-[54px] bg-[#aeb1ff]" />
+              <h1 className="my-3 max-w-[500px] text-[clamp(2.4rem,9vw,4.2rem)] font-medium leading-[1.08] tracking-[-0.045em] text-[#f1f0ea] lg:text-[clamp(2.7rem,4.2vw,4.5rem)]">{activeRecord.name}</h1>
               <p className="max-w-[440px] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-[1.85] text-[#f3f2ff]">
                 在与你生日相同的一天，<strong>哈勃曾将目光投向这里。</strong>
               </p>
@@ -321,7 +323,7 @@ function App() {
                   查看 NASA 原始资料 <span aria-hidden="true">↗</span>
                 </a>
                 <button className="border-0 bg-transparent p-0 text-[0.88rem] font-semibold text-[#f4f3ff] hover:text-[#bdc0ff] focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4" type="button" onClick={handleChooseAnotherDate}>
-                  换一个生日 <span aria-hidden="true">↗</span>
+                  换一个 <span aria-hidden="true">↗</span>
                 </button>
               </div>
             </div>
@@ -329,21 +331,20 @@ function App() {
         ) : (
           <section className="grid flex-1 grid-cols-1 content-center gap-7 py-5 sm:gap-10 sm:py-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(330px,0.9fr)] lg:gap-[clamp(2.5rem,7vw,7rem)] lg:py-8 lg:pb-16" aria-labelledby="page-title">
             <div className="max-w-[730px]">
-              <span className="block text-[0.65rem] font-semibold uppercase leading-[1.4] tracking-[0.17em] text-[#aaaaf2]">A SMALL WINDOW INTO THE UNIVERSE</span>
-              <h1 id="page-title" className="my-[1.35rem] max-w-[730px] text-[clamp(2.6rem,14vw,4.4rem)] font-semibold leading-[0.99] tracking-[-0.075em] text-[#f7f6ff] sm:text-[clamp(3rem,11vw,5.7rem)] lg:text-[clamp(3.2rem,5.4vw,5.6rem)]">
-                你的生日，<span className="block bg-gradient-to-br from-[#f7f6ff] via-[#a9adff] to-[#dbbfff] bg-clip-text text-transparent lg:whitespace-nowrap">宇宙看见了什么？</span>
+              <span className="block text-[0.72rem] tracking-[0.08em] text-[#aeb6c9]">NASA · 哈勃空间望远镜</span>
+              <h1 id="page-title" className="my-[1.35rem] max-w-[730px] text-[clamp(2.5rem,10vw,4.8rem)] font-medium leading-[1.08] tracking-[-0.045em] text-[#f1f0ea] sm:text-[clamp(3rem,9vw,5.2rem)] lg:text-[clamp(3.2rem,5vw,5.2rem)]">
+                你的生日，<span className="block text-[#d3d6dc] lg:whitespace-nowrap">宇宙看见了什么？</span>
               </h1>
               <p className="max-w-[540px] text-[clamp(1rem,1.35vw,1.23rem)] leading-[1.9] text-[rgba(224,225,244,0.77)]">
-                每一天都曾被一束来自深空的光记录。输入你的生日，看看哈勃在那一天凝望了哪里。
+                选一个月份和日期，查看哈勃在那一天记录下来的天体。
               </p>
-              <p className="mt-[2.2rem] text-[0.84rem] text-[rgba(164,168,207,0.64)]">一份来自 NASA Hubble 的生日观测记录</p>
+              <p className="mt-[2.2rem] text-[0.84rem] text-[rgba(164,168,207,0.64)]">数据来自 NASA Hubble 生日观测</p>
             </div>
 
-            <form className="rounded-[2px] border border-[rgba(174,178,255,0.22)] bg-[linear-gradient(145deg,rgba(19,22,52,0.76),rgba(11,13,31,0.58))] p-[clamp(1.35rem,3.3vw,2.6rem)] shadow-[0_30px_90px_rgba(0,0,0,0.24),inset_0_1px_rgba(255,255,255,0.06)]" onSubmit={handleSearch}>
-              <div className="mb-[2.2rem] flex items-start gap-[18px]">
-                <span className="pt-1 text-[0.7rem] uppercase tracking-[0.17em] text-[#a9adff]">01</span>
+            <form className="max-w-[560px] border-y border-[rgba(220,224,230,0.18)] bg-transparent px-0 py-[clamp(1.35rem,3.3vw,2.6rem)] shadow-none lg:max-w-none" onSubmit={handleSearch}>
+              <div className="mb-[2rem]">
                 <div>
-                  <p className="m-0 text-[1.15rem] font-semibold text-[#f5f4ff]">把你的日期交给星空</p>
+                  <p className="m-0 text-[1.15rem] font-medium text-[#f1f0ea]">选择一个生日</p>
                   <p className="m-0 mt-[5px] text-[0.83rem] text-[rgba(194,198,229,0.62)]">只需要月份和日期</p>
                 </div>
               </div>
@@ -351,7 +352,7 @@ function App() {
                 <label className="flex flex-col gap-[9px] text-[0.76rem] text-[rgba(208,210,235,0.7)]">
                   <span>月份</span>
                   <span className="relative block">
-                    <select className="w-full appearance-none rounded-none border border-[rgba(174,178,255,0.23)] bg-[rgba(6,8,22,0.7)] px-[15px] py-4 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#b8bbff] focus-visible:shadow-[0_0_0_3px_rgba(167,172,255,0.18)]" value={month} onChange={handleMonthChange} aria-label="选择月份" required>
+                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={month} onChange={handleMonthChange} aria-label="选择月份" required>
                       <option className="bg-[#f6f5ff] text-[#16172b]" value="" disabled>选择月份</option>
                       {MONTHS.map((monthName, index) => (
                         <option className="bg-[#f6f5ff] text-[#16172b]" key={monthName} value={index + 1}>{monthName}</option>
@@ -363,7 +364,7 @@ function App() {
                 <label className="flex flex-col gap-[9px] text-[0.76rem] text-[rgba(208,210,235,0.7)]">
                   <span>日期</span>
                   <span className="relative block">
-                    <select className="w-full appearance-none rounded-none border border-[rgba(174,178,255,0.23)] bg-[rgba(6,8,22,0.7)] px-[15px] py-4 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#b8bbff] focus-visible:shadow-[0_0_0_3px_rgba(167,172,255,0.18)]" value={day} onChange={handleDayChange} aria-label="选择日期" required>
+                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={day} onChange={handleDayChange} aria-label="选择日期" required>
                       <option className="bg-[#f6f5ff] text-[#16172b]" value="" disabled>选择日期</option>
                       {Array.from({ length: availableDays }, (_, index) => index + 1).map((date) => (
                         <option className="bg-[#f6f5ff] text-[#16172b]" key={date} value={date}>{String(date).padStart(2, '0')}</option>
@@ -373,8 +374,8 @@ function App() {
                   </span>
                 </label>
               </div>
-              <button className="group mt-[18px] flex w-full items-center justify-between border-0 bg-[#f4f2ff] px-[17px] py-4 text-base font-semibold text-[#101126] transition duration-200 hover:-translate-y-0.5 hover:bg-[#dfe0ff] focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4" type="submit">
-                查看那一天 <span className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true">→</span>
+              <button className="mt-6 flex w-full items-center justify-center border-0 bg-[#ecebe7] px-[17px] py-4 text-base font-medium text-[#16171a] transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4" type="submit">
+                查看这一天
               </button>
               <p className="m-0 mt-4 min-h-[1.3em] text-[0.73rem] leading-[1.6] text-[rgba(177,181,221,0.62)]" aria-live="polite">
                 {notice || '每个日期都有 5 个 Hubble 视角，包括 2 月 29 日。'}
@@ -383,7 +384,7 @@ function App() {
           </section>
         )}
 
-        <footer className="flex flex-col items-start gap-[7px] py-5 pb-[27px] text-[0.58rem] uppercase tracking-[0.17em] text-[rgba(164,168,207,0.5)] sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <footer className="flex flex-col items-start gap-[7px] py-5 pb-[27px] text-[0.68rem] tracking-[0.08em] text-[rgba(164,168,207,0.62)] sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <span>计算机爱好者协会</span>
           <span>用代码，把一束宇宙的光带到眼前。</span>
         </footer>
