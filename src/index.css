@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: #f8f7ff;
+  background: #050611;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100svh;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+@layer components {
+  .space-backdrop {
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+    color: #f8f7ff;
+    background:
+      radial-gradient(circle at 80% 18%, rgba(105, 94, 232, 0.18), transparent 26rem),
+      radial-gradient(circle at 12% 86%, rgba(28, 111, 158, 0.15), transparent 24rem),
+      linear-gradient(135deg, #050611 0%, #080a18 55%, #0a071a 100%);
+  }
+
+  .space-backdrop::before {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    content: "";
+    opacity: 0.56;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.8) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 73% 32%, rgba(201, 209, 255, 0.7) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 89% 78%, rgba(255, 255, 255, 0.75) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 42% 88%, rgba(177, 190, 255, 0.6) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 29% 52%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.5px);
+    background-size: 240px 220px, 310px 280px, 380px 340px, 290px 300px, 420px 360px;
+  }
+
+  .space-backdrop::after {
+    position: absolute;
+    z-index: -1;
+    top: 8%;
+    right: 8%;
+    width: 30rem;
+    height: 30rem;
+    content: "";
+    border-radius: 50%;
+    opacity: 0.18;
+    background: #5d65ff;
+    filter: blur(120px);
+    pointer-events: none;
+  }
+}
+
+@keyframes image-in {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
