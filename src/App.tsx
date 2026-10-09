@@ -524,6 +524,11 @@ function App() {
                   </span>
                 </label>
               </div>
+              {notice && (
+                <p className="mt-4 text-sm leading-6 text-[#ffb8b8]" role="alert">
+                  {notice}
+                </p>
+              )}
               <button className="mt-6 flex w-full items-center justify-center border-0 bg-[#ecebe7] px-[17px] py-4 text-base font-medium text-[#16171a] transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4 disabled:cursor-wait" type="submit" disabled={isChartFocusing}>
                 {isChartFocusing ? '正在准备哈勃影像…' : '查看这一天'}
               </button>
