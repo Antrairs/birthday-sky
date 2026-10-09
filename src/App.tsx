@@ -40,6 +40,26 @@ function nasaImageUrl(imageFile: string) {
   return `${NASA_IMAGE_BASE_URL}${encodeURIComponent(imageFile)}`
 }
 
+function preloadImage(imageFile: string) {
+  return new Promise<boolean>((resolve) => {
+    const image = new Image()
+
+    image.onload = () => {
+      if (typeof image.decode === 'function') {
+        image.decode().then(
+          () => resolve(true),
+          () => resolve(image.naturalWidth > 0),
+        )
+        return
+      }
+
+      resolve(image.naturalWidth > 0)
+    }
+    image.onerror = () => resolve(false)
+    image.src = nasaImageUrl(imageFile)
+  })
+}
+
 function parseCsv(text: string) {
   const rows: string[][] = []
   let row: string[] = []
@@ -199,6 +219,7 @@ function App() {
   const [results, setResults] = useState<HubbleRecord[] | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [notice, setNotice] = useState('')
+  const [isChartFocusing, setIsChartFocusing] = useState(false)
   const [imageError, setImageError] = useState(false)
   const [backgroundLayers, setBackgroundLayers] = useState<BackgroundImageLayer[]>([])
   const backgroundRequestRef = useRef<string | null>(null)
@@ -296,10 +317,23 @@ function App() {
       return
     }
 
-    setImageError(false)
-    setResults(nextResults)
-    setActiveIndex(0)
-    setNotice('')
+    const showResults = (imageLoaded: boolean) => {
+      setImageError(!imageLoaded)
+      setResults(nextResults)
+      setActiveIndex(0)
+      setNotice('')
+    }
+
+    setIsChartFocusing(true)
+    const imageReady = preloadImage(nextResults[0].imageFile)
+    const focusDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? Promise.resolve()
+      : new Promise<void>((resolve) => window.setTimeout(resolve, 720))
+
+    void Promise.all([imageReady, focusDuration]).then(([imageLoaded]) => {
+      setIsChartFocusing(false)
+      showResults(imageLoaded)
+    })
   }
 
   const handleChooseAnotherDate = () => {
@@ -311,6 +345,7 @@ function App() {
   }
 
   const dateLabel = month !== '' && day !== '' ? `${MONTHS[month - 1]} ${day} 日` : ''
+  const hasSelectedDate = month !== '' && day !== ''
 
   return (
     <main className="space-backdrop min-h-[100svh]">
@@ -337,6 +372,27 @@ function App() {
           {backgroundLayers.some((layer) => layer.isVisible) && (
             <div className="space-image-backdrop__scrim" />
           )}
+        </div>
+      )}
+      {!activeRecord && hasSelectedDate && (
+        <div
+          key={dateKey(month, day)}
+          className={`birthday-constellation is-visible${isChartFocusing ? ' is-focusing' : ''}`}
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 450 280" preserveAspectRatio="xMidYMid meet">
+            <path
+              className="birthday-constellation__lines"
+              pathLength={1}
+              d="M 68 190 L 138 104 L 217 158 L 298 72 L 382 118 M 217 158 L 278 224 L 382 118"
+            />
+            <circle className="birthday-constellation__star birthday-constellation__star--1" cx="68" cy="190" r="2.5" />
+            <circle className="birthday-constellation__star birthday-constellation__star--2" cx="138" cy="104" r="2" />
+            <circle className="birthday-constellation__star birthday-constellation__star--3" cx="217" cy="158" r="3.2" />
+            <circle className="birthday-constellation__star birthday-constellation__star--4" cx="298" cy="72" r="2.2" />
+            <circle className="birthday-constellation__star birthday-constellation__star--5" cx="382" cy="118" r="2.8" />
+            <circle className="birthday-constellation__star birthday-constellation__star--6" cx="278" cy="224" r="1.8" />
+          </svg>
         </div>
       )}
 
@@ -438,7 +494,7 @@ function App() {
               <p className="mt-[2.2rem] text-[0.84rem] text-[rgba(164,168,207,0.64)]">数据来自 NASA Hubble 观测</p>
             </div>
 
-            <form className="max-w-[560px] border-y border-[rgba(220,224,230,0.18)] bg-transparent px-0 py-[clamp(1.35rem,3.3vw,2.6rem)] shadow-none lg:max-w-none" onSubmit={handleSearch}>
+            <form className="max-w-[560px] border-y border-[rgba(220,224,230,0.18)] bg-transparent px-0 py-[clamp(1.35rem,3.3vw,2.6rem)] shadow-none lg:max-w-none" onSubmit={handleSearch} aria-busy={isChartFocusing}>
               <div className="mb-[2rem]">
                 <div>
                   <p className="m-0 text-[1.15rem] font-medium text-[#f1f0ea]">选择一个生日</p>
@@ -449,7 +505,7 @@ function App() {
                 <label className="flex flex-col gap-[9px] text-[0.76rem] text-[rgba(208,210,235,0.7)]">
                   <span>月份</span>
                   <span className="relative block">
-                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={month} onChange={handleMonthChange} aria-label="选择月份" required>
+                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={month} onChange={handleMonthChange} aria-label="选择月份" required disabled={isChartFocusing}>
                       <option className="bg-[#f6f5ff] text-[#16172b]" value="" disabled>选择月份</option>
                       {MONTHS.map((monthName, index) => (
                         <option className="bg-[#f6f5ff] text-[#16172b]" key={monthName} value={index + 1}>{monthName}</option>
@@ -461,7 +517,7 @@ function App() {
                 <label className="flex flex-col gap-[9px] text-[0.76rem] text-[rgba(208,210,235,0.7)]">
                   <span>日期</span>
                   <span className="relative block">
-                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={day} onChange={handleDayChange} aria-label="选择日期" required>
+                    <select className="w-full appearance-none rounded-none border-0 border-b border-[rgba(174,178,255,0.32)] bg-transparent px-0 py-3 pr-[38px] text-[1.02rem] text-[#f7f6ff] outline-none focus-visible:border-[#d3d6dc] focus-visible:shadow-none" value={day} onChange={handleDayChange} aria-label="选择日期" required disabled={isChartFocusing}>
                       <option className="bg-[#f6f5ff] text-[#16172b]" value="" disabled>选择日期</option>
                       {Array.from({ length: availableDays }, (_, index) => index + 1).map((date) => (
                         <option className="bg-[#f6f5ff] text-[#16172b]" key={date} value={date}>{String(date).padStart(2, '0')}</option>
@@ -471,8 +527,8 @@ function App() {
                   </span>
                 </label>
               </div>
-              <button className="mt-6 flex w-full items-center justify-center border-0 bg-[#ecebe7] px-[17px] py-4 text-base font-medium text-[#16171a] transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4" type="submit">
-                查看这一天
+              <button className="mt-6 flex w-full items-center justify-center border-0 bg-[#ecebe7] px-[17px] py-4 text-base font-medium text-[#16171a] transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4 disabled:cursor-wait" type="submit" disabled={isChartFocusing}>
+                {isChartFocusing ? '正在准备哈勃影像…' : '查看这一天'}
               </button>
             </form>
           </section>

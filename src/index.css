@@ -70,6 +70,66 @@ select {
     pointer-events: none;
   }
 
+  .space-backdrop > .birthday-constellation {
+    position: fixed;
+    z-index: 0;
+    top: clamp(15rem, 39vh, 23rem);
+    left: 50%;
+    width: min(76vw, 30rem);
+    aspect-ratio: 450 / 280;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+
+  .birthday-constellation.is-visible {
+    opacity: 0.9;
+  }
+
+  .birthday-constellation svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .birthday-constellation__lines {
+    fill: none;
+    stroke: rgba(167, 181, 255, 0.32);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.1;
+  }
+
+  .birthday-constellation.is-visible .birthday-constellation__lines {
+    animation: birthday-constellation-draw 720ms ease-out forwards;
+  }
+
+  .birthday-constellation__star {
+    fill: #e0e7ff;
+    filter: drop-shadow(0 0 4px rgba(155, 177, 255, 0.78));
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .birthday-constellation.is-visible .birthday-constellation__star {
+    animation: birthday-star-appear 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .birthday-constellation.is-visible .birthday-constellation__star--1 { animation-delay: 80ms; }
+  .birthday-constellation.is-visible .birthday-constellation__star--2 { animation-delay: 180ms; }
+  .birthday-constellation.is-visible .birthday-constellation__star--3 { animation-delay: 280ms; }
+  .birthday-constellation.is-visible .birthday-constellation__star--4 { animation-delay: 390ms; }
+  .birthday-constellation.is-visible .birthday-constellation__star--5 { animation-delay: 500ms; }
+  .birthday-constellation.is-visible .birthday-constellation__star--6 { animation-delay: 610ms; }
+
+  .birthday-constellation.is-focusing {
+    animation: birthday-constellation-focus 720ms cubic-bezier(0.7, 0, 0.84, 0.18) forwards;
+  }
+
   .space-image-backdrop__image {
     position: absolute;
     inset: -12%;
@@ -107,6 +167,44 @@ select {
   }
 }
 
+@media (min-width: 768px) {
+  .space-backdrop > .birthday-constellation {
+    top: 36vh;
+    left: 70%;
+    width: min(38vw, 34rem);
+  }
+}
+
+@keyframes birthday-constellation-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes birthday-star-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.12);
+  }
+
+  72% {
+    opacity: 1;
+    transform: scale(1.45);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes birthday-constellation-focus {
+  to {
+    opacity: 0.68;
+    transform: translateX(-50%) scale(0.46);
+  }
+}
+
 @keyframes image-in {
   from {
     opacity: 0;
@@ -120,6 +218,20 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .birthday-constellation.is-visible .birthday-constellation__lines,
+  .birthday-constellation.is-visible .birthday-constellation__star,
+  .birthday-constellation.is-focusing {
+    animation: none !important;
+  }
+
+  .birthday-constellation.is-visible .birthday-constellation__lines {
+    stroke-dashoffset: 0;
+  }
+
+  .birthday-constellation.is-visible .birthday-constellation__star {
+    opacity: 1;
+  }
+
   *,
   *::before,
   *::after {
