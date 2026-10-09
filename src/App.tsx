@@ -33,11 +33,8 @@ const MONTHS = [
   '十二月',
 ]
 
-const NASA_IMAGE_BASE_URL =
-  'https://science.nasa.gov/specials/apps/what-did-hubble-see-on-your-birthday/images/'
-
 function nasaImageUrl(imageFile: string) {
-  return `${NASA_IMAGE_BASE_URL}${encodeURIComponent(imageFile)}`
+  return `/api/hubble-image/${encodeURIComponent(imageFile)}`
 }
 
 function preloadImage(imageFile: string) {
