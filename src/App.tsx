@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type SubmitEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type SubmitEvent } from 'react'
 import csvText from './assets/data.csv?raw'
 
 type HubbleRecord = {
@@ -10,6 +10,12 @@ type HubbleRecord = {
   name: string
   sourceUrl: string
   year: number
+}
+
+type BackgroundImageLayer = {
+  imageFile: string
+  isVisible: boolean
+  src: string
 }
 
 const MONTHS = [
@@ -29,6 +35,10 @@ const MONTHS = [
 
 const NASA_IMAGE_BASE_URL =
   'https://science.nasa.gov/specials/apps/what-did-hubble-see-on-your-birthday/images/'
+
+function nasaImageUrl(imageFile: string) {
+  return `${NASA_IMAGE_BASE_URL}${encodeURIComponent(imageFile)}`
+}
 
 function parseCsv(text: string) {
   const rows: string[][] = []
@@ -190,8 +200,69 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [notice, setNotice] = useState('')
   const [imageError, setImageError] = useState(false)
+  const [backgroundLayers, setBackgroundLayers] = useState<BackgroundImageLayer[]>([])
+  const backgroundRequestRef = useRef<string | null>(null)
   const activeRecord = results?.[activeIndex] ?? null
+  const activeImageFile = activeRecord?.imageFile
   const availableDays = month === '' ? 31 : daysInMonth(month)
+
+  useEffect(() => {
+    if (!activeImageFile || imageError) {
+      backgroundRequestRef.current = null
+      setBackgroundLayers([])
+      return
+    }
+
+    backgroundRequestRef.current = activeImageFile
+
+    const incomingLayer: BackgroundImageLayer = {
+      imageFile: activeImageFile,
+      isVisible: false,
+      src: nasaImageUrl(activeImageFile),
+    }
+
+    setBackgroundLayers((currentLayers) => {
+      const visibleLayer = [...currentLayers].reverse().find((layer) => layer.isVisible)
+
+      if (visibleLayer?.imageFile === activeImageFile) {
+        return [visibleLayer]
+      }
+
+      return [...(visibleLayer ? [visibleLayer] : []), incomingLayer]
+    })
+  }, [activeImageFile, imageError])
+
+  const handleBackgroundImageLoad = (imageFile: string) => {
+    if (backgroundRequestRef.current !== imageFile) {
+      return
+    }
+
+    setBackgroundLayers((currentLayers) =>
+      currentLayers.map((layer) => ({
+        ...layer,
+        isVisible: layer.imageFile === imageFile,
+      })),
+    )
+  }
+
+  const handleBackgroundImageError = (imageFile: string) => {
+    if (backgroundRequestRef.current !== imageFile) {
+      return
+    }
+
+    backgroundRequestRef.current = null
+    setBackgroundLayers([])
+  }
+
+  const handleBackgroundTransitionEnd = (imageFile: string, isVisible: boolean) => {
+    if (isVisible) {
+      return
+    }
+
+    setBackgroundLayers((currentLayers) =>
+      currentLayers.filter((layer) => layer.imageFile !== imageFile),
+    )
+  }
 
   const handleMonthChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextMonth = Number(event.target.value)
@@ -243,6 +314,32 @@ function App() {
 
   return (
     <main className="space-backdrop min-h-[100svh]">
+      {backgroundLayers.length > 0 && (
+        <div className="space-image-backdrop" aria-hidden="true">
+          {backgroundLayers.map((layer) => (
+            <img
+              key={layer.imageFile}
+              className={`space-image-backdrop__image ${layer.isVisible ? 'is-visible' : ''}`}
+              src={layer.src}
+              alt=""
+              loading="eager"
+              decoding="async"
+              fetchPriority="low"
+              onLoad={() => handleBackgroundImageLoad(layer.imageFile)}
+              onError={() => handleBackgroundImageError(layer.imageFile)}
+              onTransitionEnd={(event) => {
+                if (event.propertyName === 'opacity') {
+                  handleBackgroundTransitionEnd(layer.imageFile, layer.isVisible)
+                }
+              }}
+            />
+          ))}
+          {backgroundLayers.some((layer) => layer.isVisible) && (
+            <div className="space-image-backdrop__scrim" />
+          )}
+        </div>
+      )}
+
       <div className="mx-auto flex min-h-[100svh] w-[calc(100%_-_2rem)] max-w-[1220px] flex-col sm:w-[calc(100%_-_2.5rem)] lg:w-[calc(100%_-_4.5rem)]">
         <header className="flex items-center justify-between border-b border-[rgba(220,224,230,0.12)] pb-5 pt-[22px] sm:pt-[30px]">
           <div className="inline-flex items-center gap-2.5 text-[0.78rem] font-medium tracking-[0.08em] text-[#e8e8e4]" aria-label="计算机爱好者协会">
@@ -268,7 +365,7 @@ function App() {
                   <img
                     key={activeRecord.imageFile}
                     className="block h-auto max-h-[min(72vh,720px)] max-w-full w-auto animate-[image-in_680ms_ease_both] object-contain"
-                    src={`${NASA_IMAGE_BASE_URL}${encodeURIComponent(activeRecord.imageFile)}`}
+                    src={nasaImageUrl(activeRecord.imageFile)}
                     alt={`${activeRecord.name}，哈勃空间望远镜影像`}
                     loading="eager"
                     decoding="async"
@@ -301,7 +398,7 @@ function App() {
             </div>
 
             <div className="max-w-[480px] lg:max-w-none">
-              <span className="block text-[0.72rem] tracking-[0.08em] text-[#aeb6c9]">NASA · 哈勃生日观测</span>
+              <span className="block text-[0.72rem] tracking-[0.08em] text-[#aeb6c9]">NASA · 哈勃观测</span>
               <p className="mt-[18px] text-base tracking-[0.12em] text-[#aeb1ff]">{dateLabel}</p>
               <h1 className="my-3 max-w-[500px] text-[clamp(2.4rem,9vw,4.2rem)] font-medium leading-[1.08] tracking-[-0.045em] text-[#f1f0ea] lg:text-[clamp(2.7rem,4.2vw,4.5rem)]">{activeRecord.name}</h1>
               <p className="max-w-[440px] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-[1.85] text-[#f3f2ff]">
@@ -338,7 +435,7 @@ function App() {
               <p className="max-w-[540px] text-[clamp(1rem,1.35vw,1.23rem)] leading-[1.9] text-[rgba(224,225,244,0.77)]">
                 选一个月份和日期，查看哈勃在那一天记录下来的天体。
               </p>
-              <p className="mt-[2.2rem] text-[0.84rem] text-[rgba(164,168,207,0.64)]">数据来自 NASA Hubble 生日观测</p>
+              <p className="mt-[2.2rem] text-[0.84rem] text-[rgba(164,168,207,0.64)]">数据来自 NASA Hubble 观测</p>
             </div>
 
             <form className="max-w-[560px] border-y border-[rgba(220,224,230,0.18)] bg-transparent px-0 py-[clamp(1.35rem,3.3vw,2.6rem)] shadow-none lg:max-w-none" onSubmit={handleSearch}>
@@ -377,15 +474,11 @@ function App() {
               <button className="mt-6 flex w-full items-center justify-center border-0 bg-[#ecebe7] px-[17px] py-4 text-base font-medium text-[#16171a] transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#d9d9ff] focus-visible:outline-offset-4" type="submit">
                 查看这一天
               </button>
-              <p className="m-0 mt-4 min-h-[1.3em] text-[0.73rem] leading-[1.6] text-[rgba(177,181,221,0.62)]" aria-live="polite">
-                {notice || '每个日期都有 5 个 Hubble 视角，包括 2 月 29 日。'}
-              </p>
             </form>
           </section>
         )}
 
         <footer className="flex flex-col items-start gap-[7px] py-5 pb-[27px] text-[0.68rem] tracking-[0.08em] text-[rgba(164,168,207,0.62)] sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-          <span>计算机爱好者协会</span>
           <span>用代码，把一束宇宙的光带到眼前。</span>
         </footer>
       </div>
